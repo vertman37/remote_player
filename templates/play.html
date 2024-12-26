@@ -4,24 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play File</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #player-container {
+            margin: 50px auto;
+            max-width: 600px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        video, audio {
+            width: 100%;
+            max-height: 300px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Play File: {{ filename }}</h1>
-    <div>
-        {% if filepath.endswith('.mp4') or filepath.endswith('.webm') %}
-        <video controls>
-            <source src="{{ filepath }}" type="video/mp4">
+    <h1>Playing: {{ filename }}</h1>
+    <div id="player-container">
+        {% if filepath.endswith('.mp4') or filepath.endswith('.webm') or filepath.endswith('.mkv') %}
+        <video id="media-player" controls>
+            <source src="{{ filepath }}" type="video/{{ 'ogg' if filepath.endswith('.mkv') else 'mp4' }}">
             Your browser does not support the video tag.
         </video>
-        {% elif filepath.endswith('.mp3') or filepath.endswith('.wav') %}
-        <audio controls>
-            <source src="{{ filepath }}" type="audio/mpeg">
+        {% elif filepath.endswith('.mp3') or filepath.endswith('.wav') or filepath.endswith('.ogg') %}
+        <audio id="media-player" controls>
+            <source src="{{ filepath }}" type="audio/{{ 'ogg' if filepath.endswith('.ogg') else 'mpeg' }}">
             Your browser does not support the audio tag.
         </audio>
         {% else %}
         <p>Unsupported file type.</p>
         {% endif %}
+        <div class="controls">
+            <button id="play-btn">Play</button>
+            <button id="pause-btn">Pause</button>
+            <button id="rewind-btn">Rewind</button>
+        </div>
     </div>
     <a href="{{ filepath }}" download>Download File</a>
+
+    <script>
+        const mediaPlayer = document.getElementById('media-player');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const rewindBtn = document.getElementById('rewind-btn');
+
+        function sendActionToServer(action) {
+            fetch(`/play/{{ filename }}?action=${action}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action }),
+            }).catch(error => console.error('Error:', error));
+        }
+
+        playBtn.addEventListener('click', () => {
+            // mediaPlayer.play();
+            sendActionToServer('play');
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            // mediaPlayer.pause();
+            sendActionToServer('pause');
+        });
+
+        rewindBtn.addEventListener('click', () => {
+            // mediaPlayer.currentTime = 0;
+            sendActionToServer('rewind');
+        });
+    </script>
 </body>
 </html>

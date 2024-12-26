@@ -1,6 +1,9 @@
 
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify
 import os
+
+from player import Player
+player = Player()
 
 app = Flask(__name__)
 
@@ -14,6 +17,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -35,6 +39,23 @@ def uploaded_file(filename):
 def play_file(filename):
     filepath = url_for('uploaded_file', filename=filename)
     return render_template('play.html', filepath=filepath, filename=filename)
+
+@app.route('/play/<filename>', methods=['POST'])
+def control_file(filename):
+    action = request.json.get('action')
+    if action in ['play', 'pause', 'rewind']:
+        # print(f"Action received for {filename}: {action}")
+        fpath = os.path.join(app.config['UPLOAD_FOLDER'],filename)
+        if action == 'play':
+            player.load(fpath)
+            player.stop()
+            player.play()
+        elif action == 'pause':
+            player.stop()
+        
+        return jsonify({"status": "success", "action": action})
+    return jsonify({"status": "error", "message": "Invalid action"}), 400
+
 
 if __name__ == '__main__':
     app.run(debug=True)
