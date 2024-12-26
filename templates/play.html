@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play File</title>
+</head>
+<body>
+    <h1>Play File: {{ filename }}</h1>
+    <div>
+        {% if filepath.endswith('.mp4') or filepath.endswith('.webm') %}
+        <video controls>
+            <source src="{{ filepath }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        {% elif filepath.endswith('.mp3') or filepath.endswith('.wav') %}
+        <audio controls>
+            <source src="{{ filepath }}" type="audio/mpeg">
+            Your browser does not support the audio tag.
+        </audio>
+        {% else %}
+        <p>Unsupported file type.</p>
+        {% endif %}
+    </div>
+    <a href="{{ filepath }}" download>Download File</a>
+</body>
+</html>
