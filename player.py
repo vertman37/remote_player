@@ -1,66 +1,62 @@
-import pygame
+import pyglet
 
-class Player:
+class AudioPlayer:
     def __init__(self):
-        # Initialize the pygame mixer
-        pygame.mixer.init()
-        self.is_playing = False
-        self.is_paused = False
-        self.current_track = None
-        self.volume = 1.0  # Full volume by default
+        self.player = pyglet.media.Player()
+        self.source = None
+        self.is_loaded = False
 
-    def load(self, track_path):
-        """Load a music track."""
-        if pygame.mixer.music.get_busy():
-            pygame.mixer.music.stop()
-        pygame.mixer.music.load(track_path)
-        self.current_track = track_path
-
+    def load(self, filepath):
+        """Load an audio file."""
+        try:
+            self.source = pyglet.media.load(filepath)
+            self.player.queue(self.source)
+            self.is_loaded = True
+        except Exception as e:
+            print(f"Error loading file: {e}")
+    
     def play(self):
-        """Play the loaded track."""
-        if not self.is_playing:
-            pygame.mixer.music.play(-1)  # -1 means loop indefinitely
-            self.is_playing = True
-            self.is_paused = False
-
-    def pause(self):
-        """Pause the music."""
-        if self.is_playing and not self.is_paused:
-            pygame.mixer.music.pause()
-            self.is_paused = True
-
-    def unpause(self):
-        """Unpause the music."""
-        if self.is_paused:
-            pygame.mixer.music.unpause()
-            self.is_paused = False
-
+        """Play the loaded audio."""
+        if self.is_loaded:
+            self.player.play()
+        else:
+            print("No audio loaded.")
+    
     def stop(self):
-        """Stop the music."""
-        if self.is_playing:
-            pygame.mixer.music.stop()
-            self.is_playing = False
-            self.is_paused = False
-
+        """Stop the audio playback."""
+        if self.player.playing:
+            self.player.pause()
+            
+    def rewind(self):
+        """Rewind the audio to the start."""
+        if self.is_loaded:
+            self.player.seek(0)  # Rewinds to the start (0 seconds)
+            self.player.play()   # Optionally, immediately start playing after rewinding
+        else:
+            print("No audio loaded.")
+    
     def set_volume(self, volume):
         """Set the volume (0.0 to 1.0)."""
-        self.volume = volume
-        pygame.mixer.music.set_volume(self.volume)
+        if 0.0 <= volume <= 1.0:
+            self.player.volume = volume
+        else:
+            print("Volume must be between 0.0 and 1.0.")
 
-    def get_volume(self):
-        """Get the current volume."""
-        return self.volume
-
-    def is_playing(self):
-        """Check if the music is currently playing."""
-        return self.is_playing
-
-
-# Usage example
+# Usage Example:
 if __name__ == "__main__":
-    player = Player()
-    player.load('music.mp3')  # Replace with your music file path
+    player = AudioPlayer()
+
+    # Load an audio file
+    player.load('music.mp3')  # Replace with your file path (MP3, OGG, or WAV)
+
+    # Play the audio
     player.play()
 
-    # Here, you can control the player using methods like:
-    # player.pause(), player.unpause(), player.stop(), player.set_volume(0.5), etc.
+    # Set volume to 0.5
+    player.set_volume(0.5)
+
+    # Stop the audio after a delay (e.g., 5 seconds)
+    pyglet.clock.schedule_once(lambda dt: player.stop(), 5)
+
+    # Keep the application running so the sound can play
+    pyglet.app.run()

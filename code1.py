@@ -2,8 +2,8 @@
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify
 import os
 
-from player import Player
-player = Player()
+from player import AudioPlayer
+player = AudioPlayer()
 
 app = Flask(__name__)
 
@@ -48,10 +48,12 @@ def control_file(filename):
         fpath = os.path.join(app.config['UPLOAD_FOLDER'],filename)
         if action == 'play':
             player.load(fpath)
-            player.stop()
+            # player.stop()
             player.play()
         elif action == 'pause':
             player.stop()
+        elif action == 'rewind':
+            player.rewind()
         
         return jsonify({"status": "success", "action": action})
     return jsonify({"status": "error", "message": "Invalid action"}), 400
