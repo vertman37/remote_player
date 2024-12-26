@@ -63,8 +63,16 @@
             <button id="play-btn">Play</button>
             <button id="pause-btn">Pause</button>
             <button id="rewind-btn">Rewind</button>
+            
+            <div>
+                <label for="volume-bar">Volume:</label>
+                <input type="range" id="volume-bar" min="0" max="1" step="0.01" value="1" oninput="setVolume(this.value)">
+                <span id="volume-value">1.0</span>
+            </div>
         </div>
+
     </div>
+
     <a href="{{ filepath }}" download>Download File</a>
 
     <script>
@@ -98,5 +106,31 @@
             sendActionToServer('rewind');
         });
     </script>
+
+
+    <script>
+        // Get the audio element and volume control slider
+        const audioPlayer = document.getElementById('audio-player');
+        const volumeSlider = document.getElementById('volume-bar');
+        const volumeValue = document.getElementById('volume-value');
+
+        // Function to set the volume based on the slider value
+        function setVolume(volume) {
+            volumeValue.innerText = volume;  // Display the volume value
+            sendVolumeToServer(volume);
+        }
+
+        function sendVolumeToServer(volume) {
+            fetch(`/set_volume?volume=${volume}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ volume }),
+            }).catch(error => console.error('Error:', error));
+        }
+
+    </script>
+
 </body>
 </html>

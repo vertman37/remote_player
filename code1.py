@@ -57,5 +57,13 @@ def control_file(filename):
     return jsonify({"status": "error", "message": "Invalid action"}), 400
 
 
+@app.route('/set_volume', methods=['POST'])
+def set_volume():
+    volume = float(request.json.get('volume'))
+    player.set_volume(volume)
+    return jsonify(status="Volume set", volume=volume)
+
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
